@@ -9,9 +9,9 @@ package javaapplication2;
  * @author Илья
  */
 public class tabs extends javax.swing.JFrame {
-    
+ 
+    private java.util.List<RecIntegral> list = new java.util.ArrayList<>();
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(tabs.class.getName());
-
     /**
      * Creates new form tabs
      */
@@ -42,6 +42,8 @@ public class tabs extends javax.swing.JFrame {
         textfield_lowline = new javax.swing.JTextField();
         textfield_highline = new javax.swing.JTextField();
         textfield_step = new javax.swing.JTextField();
+        button_add_collection = new javax.swing.JButton();
+        button_delete_collection = new javax.swing.JButton();
 
         javax.swing.GroupLayout jFrame1Layout = new javax.swing.GroupLayout(jFrame1.getContentPane());
         jFrame1.getContentPane().setLayout(jFrame1Layout);
@@ -73,11 +75,11 @@ public class tabs extends javax.swing.JFrame {
 
             },
             new String [] {
-                "НП", "ВП", "Шаг", "Результат"
+                "ID", "НП", "ВП", "Шаг", "Результат"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                true, true, true, false
+                true, true, true, true, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -96,17 +98,19 @@ public class tabs extends javax.swing.JFrame {
 
         textfield_highline.addActionListener(this::textfield_highlineActionPerformed);
 
+        button_add_collection.setText("Восстановить из коллекции");
+        button_add_collection.addActionListener(this::button_add_collectionActionPerformed);
+
+        button_delete_collection.setText("Очистить таблицу");
+        button_delete_collection.addActionListener(this::button_delete_collectionActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(table_result, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(func_text)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(text_low_line)
@@ -116,29 +120,37 @@ public class tabs extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(textfield_highline, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
                             .addComponent(textfield_step)
-                            .addComponent(textfield_lowline))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(button_calculate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(button_delete, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(button_add, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(22, 22, 22))))
+                            .addComponent(textfield_lowline)))
+                    .addComponent(func_text))
+                .addGap(37, 37, 37)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(button_delete_collection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(button_add_collection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(button_calculate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(button_delete, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(button_add, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(22, 22, 22))
+            .addComponent(table_result)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(12, Short.MAX_VALUE)
                 .addComponent(func_text)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(text_high_line)
                     .addComponent(textfield_highline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(button_add))
+                    .addComponent(button_add)
+                    .addComponent(button_add_collection))
                 .addGap(5, 5, 5)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(text_low_line)
                     .addComponent(textfield_lowline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(button_delete))
+                    .addComponent(button_delete)
+                    .addComponent(button_delete_collection))
                 .addGap(4, 4, 4)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(text_step)
@@ -155,28 +167,82 @@ public class tabs extends javax.swing.JFrame {
     private void button_deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_deleteActionPerformed
         int selectedRow = jTable1.getSelectedRow();
         if (selectedRow != -1){
+
+            int id = (int) jTable1.getValueAt(selectedRow, 0);
+
+            RecIntegral toRemove = null;
+            for (RecIntegral r : list) {
+                if (r.id == id) {
+                    toRemove = r;
+                    break;
+                }
+            }
+            if (toRemove != null) {
+                list.remove(toRemove);
+            }
+
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) jTable1.getModel();
             model.removeRow(selectedRow);
-        }else {
+
+        } else {
             javax.swing.JOptionPane.showMessageDialog(this, "Choose, delete row!");
         }
     }//GEN-LAST:event_button_deleteActionPerformed
 
     private void button_add(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_add
         try {
-            String np = textfield_lowline.getText();
-            String vp = textfield_highline.getText();
-            String step = textfield_step.getText();
+            double a = Double.parseDouble(textfield_lowline.getText());
+            double b = Double.parseDouble(textfield_highline.getText());
+            double h = Double.parseDouble(textfield_step.getText());
             
+                    // Проверка диапазона
+            if (a < 0.000001 || a > 1_000_000 ||
+                b < 0.000001 || b > 1_000_000 ||
+                h < 0.000001 || h > 1_000_000) {
+
+                throw new InvalidException(
+                        "Значения должны быть в диапазоне 0.000001 – 1 000 000"
+                );
+            }
+
+            // Проверка, что a < b
+            if (a >= b) {
+                throw new InvalidException(
+                        "Нижний порог должен быть меньше верхнего"
+                );
+            }
+
+            // Проверка шага
+            if (h <= 0) {
+                throw new InvalidException(
+                        "Шаг должен быть больше 0"
+                );
+            }
+            
+            //шаг превышает интервал интегрирования
+            if (h > b - a){
+                throw new InvalidException(
+                        "Шаг первышает интервал интегрирования"
+                );
+            }
+            
+            
+            RecIntegral rec = new RecIntegral(a,b,h,0);
+            list.add(rec);
             javax.swing.table.DefaultTableModel model = 
                     (javax.swing.table.DefaultTableModel) jTable1.getModel();
-            model.addRow(new Object[]{np, vp, step, ""});
+            model.addRow(new Object[]{rec.id,a,b,h,0});
+
             
-        } catch (Exception e){
-            javax.swing.JOptionPane.showMessageDialog(this,"Error, no correct data!");
+        } catch (InvalidException ex) {
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Ошибка данных",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
         }
-        
     }//GEN-LAST:event_button_add
 
     private void textfield_highlineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfield_highlineActionPerformed
@@ -186,11 +252,21 @@ public class tabs extends javax.swing.JFrame {
     private void textfield_lowlineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfield_lowlineActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_textfield_lowlineActionPerformed
-    
-    public class RecIntegral {
+
+    private void button_delete_collectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_delete_collectionActionPerformed
+        javax.swing.table.DefaultTableModel model = 
+                (javax.swing.table.DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);        
+        // TODO add your handling code here:
+    }//GEN-LAST:event_button_delete_collectionActionPerformed
+
+    private void button_add_collectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_add_collectionActionPerformed
+         javax.swing.table.DefaultTableModel model=(javax.swing.table.DefaultTableModel) jTable1.getModel();
+        //model.setRowCount(0);
+        refreshTable();
+        // TODO add your handling code here:
+    }//GEN-LAST:event_button_add_collectionActionPerformed
         
-    }
-    
     private void button_calculate(java.awt.event.ActionEvent evt) {
     int selectedRow = jTable1.getSelectedRow();
 
@@ -198,21 +274,12 @@ public class tabs extends javax.swing.JFrame {
         try {
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) jTable1.getModel();
+        
 
-            double a = Double.parseDouble(model.getValueAt(selectedRow, 0).toString());
-            double b = Double.parseDouble(model.getValueAt(selectedRow, 1).toString());
-            double h = Double.parseDouble(model.getValueAt(selectedRow, 2).toString());
-
-            if (a <= 0 || b <= 0) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                        "1/x undefined at x <= 0!");
-                return;
-            }
-
-            double result = calculateIntegral(a, b, h);
-
+            RecIntegral rec = list.get(selectedRow);
+            double result = rec.calculate();                  
+            model.setValueAt(result, selectedRow, 4);
             
-            model.setValueAt(result, selectedRow, 3);
 
         } catch (Exception e) {
             javax.swing.JOptionPane.showMessageDialog(this,
@@ -224,37 +291,23 @@ public class tabs extends javax.swing.JFrame {
     }
 }
 
-    private double calculateIntegral(double a, double b, double h) {
-    if (h <= 0) {
-        throw new IllegalArgumentException("Step must be > 0");
+    private void refreshTable() {
+    javax.swing.table.DefaultTableModel model =
+            (javax.swing.table.DefaultTableModel) jTable1.getModel();
+
+    model.setRowCount(0); // очищаем таблицу
+
+    for (RecIntegral r : list) {
+        model.addRow(new Object[]{
+                r.id,
+                r.a,
+                r.b,
+                r.h,
+                r.result
+        });
     }
-
-    double sum = 0.0;
-    double x = a;
-
-    while (x < b) {
-
-        double x1 = x;
-        double x2 = x + h;
-
-       
-        if (x2 > b) {
-            x2 = b;
-        }
-
-        if (x1 == 0 || x2 == 0) {
-            throw new IllegalArgumentException("1/x undefined at x = 0");
-        }
-
-        double step = x2 - x1;
-
-        sum += (1.0 / x1 + 1.0 / x2) / 2.0 * step;
-
-        x = x2;
-    }
-    
-    return sum;
 }
+
 
     /**
      * @param args the command line arguments
@@ -267,8 +320,10 @@ public class tabs extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton button_add;
+    private javax.swing.JButton button_add_collection;
     private javax.swing.JButton button_calculate;
     private javax.swing.JButton button_delete;
+    private javax.swing.JButton button_delete_collection;
     private javax.swing.JLabel func_text;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JTable jTable1;
