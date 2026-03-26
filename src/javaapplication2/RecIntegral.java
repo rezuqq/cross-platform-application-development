@@ -4,7 +4,11 @@
  */
 package javaapplication2;
 
-public class RecIntegral {
+import java.io.Serializable;
+
+public class RecIntegral implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     static int counter = 0;
     int id;
     double a;

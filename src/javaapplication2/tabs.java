@@ -4,6 +4,20 @@
  */
 package javaapplication2;
 
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+import java.util.ArrayList;
+
 /**
  *
  * @author Илья
@@ -18,6 +32,35 @@ public class tabs extends javax.swing.JFrame {
     public tabs() {
         initComponents();
         button_calculate.addActionListener(this::button_calculate);
+                // Синхронизация таблицы и коллекции
+        jTable1.getModel().addTableModelListener(e -> {
+            int row = e.getFirstRow();
+            int col = e.getColumn();
+
+            if (row < 0 || col < 0) return;
+
+            // Получаем ID строки
+            int id = (int) jTable1.getValueAt(row, 0);
+
+            // Ищем объект в коллекции
+            RecIntegral rec = null;
+            for (RecIntegral r : list) {
+                if (r.id == id) {
+                    rec = r;
+                    break;
+                }
+            }
+
+            if (rec == null) return;
+
+            // Обновляем поля объекта
+            switch (col) {
+                case 1 -> rec.a = Double.parseDouble(jTable1.getValueAt(row, 1).toString());
+                case 2 -> rec.b = Double.parseDouble(jTable1.getValueAt(row, 2).toString());
+                case 3 -> rec.h = Double.parseDouble(jTable1.getValueAt(row, 3).toString());
+                case 4 -> rec.result = Double.parseDouble(jTable1.getValueAt(row, 4).toString());
+            }
+        });
     }
 
     /**
@@ -44,6 +87,10 @@ public class tabs extends javax.swing.JFrame {
         textfield_step = new javax.swing.JTextField();
         button_add_collection = new javax.swing.JButton();
         button_delete_collection = new javax.swing.JButton();
+        button_save_text = new javax.swing.JButton();
+        button_load_text = new javax.swing.JButton();
+        button_save_binary = new javax.swing.JButton();
+        button_load_binary = new javax.swing.JButton();
 
         javax.swing.GroupLayout jFrame1Layout = new javax.swing.GroupLayout(jFrame1.getContentPane());
         jFrame1.getContentPane().setLayout(jFrame1Layout);
@@ -104,10 +151,23 @@ public class tabs extends javax.swing.JFrame {
         button_delete_collection.setText("Очистить таблицу");
         button_delete_collection.addActionListener(this::button_delete_collectionActionPerformed);
 
+        button_save_text.setText("Сохранить в txt");
+        button_save_text.addActionListener(this::button_save_textActionPerformed);
+
+        button_load_text.setText("Загрузить из txt");
+        button_load_text.addActionListener(this::button_load_textActionPerformed);
+
+        button_save_binary.setText("Сохранить в бинарный файл");
+        button_save_binary.addActionListener(this::button_save_binaryActionPerformed);
+
+        button_load_binary.setText("Загрузить из бинарного файла");
+        button_load_binary.addActionListener(this::button_load_binaryActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(table_result)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -122,42 +182,68 @@ public class tabs extends javax.swing.JFrame {
                             .addComponent(textfield_step)
                             .addComponent(textfield_lowline)))
                     .addComponent(func_text))
-                .addGap(37, 37, 37)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(button_delete_collection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(button_add_collection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(button_calculate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(button_delete, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(button_add, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(22, 22, 22))
-            .addComponent(table_result)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(button_delete_collection, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(button_add_collection)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(button_load_binary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(button_save_text, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(button_load_text, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(button_save_binary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 154, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(button_calculate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(button_delete, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(button_add, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(22, 22, 22))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(12, Short.MAX_VALUE)
-                .addComponent(func_text)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(19, 19, 19)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(text_high_line)
-                    .addComponent(textfield_highline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(button_add)
-                    .addComponent(button_add_collection))
-                .addGap(5, 5, 5)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(text_low_line)
-                    .addComponent(textfield_lowline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(button_delete)
-                    .addComponent(button_delete_collection))
-                .addGap(4, 4, 4)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(text_step)
-                    .addComponent(textfield_step, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(button_calculate))
-                .addGap(37, 37, 37)
-                .addComponent(table_result, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(func_text)
+                    .addComponent(button_save_text))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(text_high_line)
+                            .addComponent(button_load_text))
+                        .addGap(12, 12, 12))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(button_add)
+                            .addComponent(textfield_highline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(text_low_line)
+                            .addComponent(textfield_lowline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(button_delete))
+                        .addGap(4, 4, 4)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(text_step)
+                            .addComponent(textfield_step, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(button_calculate)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(button_save_binary)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(button_load_binary)))
+                .addGap(18, 18, 18)
+                .addComponent(button_add_collection)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(button_delete_collection)
+                .addGap(18, 18, 18)
+                .addComponent(table_result, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE)
                 .addGap(3, 3, 3))
         );
 
@@ -266,6 +352,99 @@ public class tabs extends javax.swing.JFrame {
         refreshTable();
         // TODO add your handling code here:
     }//GEN-LAST:event_button_add_collectionActionPerformed
+
+    private void button_save_textActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_save_textActionPerformed
+        // TODO add your handling code here:
+        JFileChooser chooser = new JFileChooser();
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+
+            try (PrintWriter pw = new PrintWriter(file)) {
+                for (RecIntegral r : list) {
+                    pw.println(r.id + ";" + r.a + ";" + r.b + ";" + r.h + ";" + r.result);
+                }
+                JOptionPane.showMessageDialog(this, "Сохранено в текстовый файл!");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Ошибка сохранения: " + e.getMessage());
+            }
+        }
+    }//GEN-LAST:event_button_save_textActionPerformed
+
+    private void button_save_binaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_save_binaryActionPerformed
+        // TODO add your handling code here:                                                                                          
+        JFileChooser chooser = new JFileChooser();
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
+                out.writeObject(list);
+                JOptionPane.showMessageDialog(this, "Сохранено в бинарный файл!");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Ошибка сохранения: " + e.getMessage());
+            }
+        }
+    }//GEN-LAST:event_button_save_binaryActionPerformed
+
+    private void button_load_textActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_load_textActionPerformed
+        // TODO add your handling code here:
+               JFileChooser chooser = new JFileChooser();
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+
+            list.clear();
+
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] p = line.split(";");
+
+                    RecIntegral r = new RecIntegral(
+                            Double.parseDouble(p[1]),
+                            Double.parseDouble(p[2]),
+                            Double.parseDouble(p[3]),
+                            Double.parseDouble(p[4])
+                    );
+                    r.id = Integer.parseInt(p[0]);
+                    list.add(r);
+                }
+
+                // обновляем counter, чтобы ID не повторялись
+                RecIntegral.counter = list.stream()
+                        .mapToInt(r -> r.id)
+                        .max()
+                        .orElse(0) + 1;
+
+                refreshTable();
+                JOptionPane.showMessageDialog(this, "Загружено из текстового файла!");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Ошибка загрузки: " + e.getMessage());
+            }
+        }
+
+    }//GEN-LAST:event_button_load_textActionPerformed
+
+    private void button_load_binaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_load_binaryActionPerformed
+        // TODO add your handling code here:                                              
+        JFileChooser chooser = new JFileChooser();
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+
+            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+                list = (ArrayList<RecIntegral>) in.readObject();
+
+                // обновляем counter
+                RecIntegral.counter = list.stream()
+                        .mapToInt(r -> r.id)
+                        .max()
+                        .orElse(0) + 1;
+
+                refreshTable();
+                JOptionPane.showMessageDialog(this, "Загружено из бинарного файла!");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Ошибка загрузки: " + e.getMessage());
+            }
+        }
+    }//GEN-LAST:event_button_load_binaryActionPerformed
         
     private void button_calculate(java.awt.event.ActionEvent evt) {
     int selectedRow = jTable1.getSelectedRow();
@@ -324,6 +503,10 @@ public class tabs extends javax.swing.JFrame {
     private javax.swing.JButton button_calculate;
     private javax.swing.JButton button_delete;
     private javax.swing.JButton button_delete_collection;
+    private javax.swing.JButton button_load_binary;
+    private javax.swing.JButton button_load_text;
+    private javax.swing.JButton button_save_binary;
+    private javax.swing.JButton button_save_text;
     private javax.swing.JLabel func_text;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JTable jTable1;
