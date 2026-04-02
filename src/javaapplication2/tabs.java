@@ -114,6 +114,7 @@ public class tabs extends javax.swing.JFrame {
         button_delete.addActionListener(this::button_deleteActionPerformed);
 
         button_calculate.setText("Вычислить");
+        button_calculate.addActionListener(this::button_calculateActionPerformed);
 
         func_text.setText("1/x");
 
@@ -193,9 +194,8 @@ public class tabs extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(button_load_binary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(button_save_text, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(button_load_text, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(button_save_text, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(button_load_text, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(button_save_binary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 154, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -278,55 +278,60 @@ public class tabs extends javax.swing.JFrame {
 
     private void button_add(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_add
         try {
-            double a = Double.parseDouble(textfield_lowline.getText());
-            double b = Double.parseDouble(textfield_highline.getText());
-            double h = Double.parseDouble(textfield_step.getText());
-            
-                    // Проверка диапазона
-            if (a < 0.000001 || a > 1_000_000 ||
-                b < 0.000001 || b > 1_000_000 ||
-                h < 0.000001 || h > 1_000_000) {
+            double a, b, h;
 
-                throw new InvalidException(
-                        "Значения должны быть в диапазоне 0.000001 – 1 000 000"
-                );
+            // --- Проверка ввода чисел ---
+            try {
+                a = Double.parseDouble(textfield_lowline.getText());
+            } catch (NumberFormatException e) {
+                throw new InvalidException("Введите корректное число", "Нижний порог", textfield_lowline.getText());
             }
 
-            // Проверка, что a < b
-            if (a >= b) {
-                throw new InvalidException(
-                        "Нижний порог должен быть меньше верхнего"
-                );
+            try {
+                b = Double.parseDouble(textfield_highline.getText());
+            } catch (NumberFormatException e) {
+                throw new InvalidException("Введите корректное число", "Верхний порог", textfield_highline.getText());
             }
 
-            // Проверка шага
-            if (h <= 0) {
-                throw new InvalidException(
-                        "Шаг должен быть больше 0"
-                );
+            try {
+                h = Double.parseDouble(textfield_step.getText());
+            } catch (NumberFormatException e) {
+                throw new InvalidException("Введите корректное число", "Шаг", textfield_step.getText());
             }
-            
-            //шаг превышает интервал интегрирования
-            if (h > b - a){
-                throw new InvalidException(
-                        "Шаг первышает интервал интегрирования"
-                );
-            }
-            
-            
-            RecIntegral rec = new RecIntegral(a,b,h,0);
+
+            // --- Логические проверки ---
+            if (a < 0.000001 || a > 1_000_000)
+                throw new InvalidException("Значение вне диапазона 0.000001 – 1 000 000", "Нижний порог", String.valueOf(a));
+
+            if (b < 0.000001 || b > 1_000_000)
+                throw new InvalidException("Значение вне диапазона 0.000001 – 1 000 000", "Верхний порог", String.valueOf(b));
+
+            if (h <= 0)
+                throw new InvalidException("Шаг должен быть больше 0", "Шаг", String.valueOf(h));
+
+            if (h > b - a)
+                throw new InvalidException("Шаг превышает интервал интегрирования", "Шаг", String.valueOf(h));
+
+            if (a >= b)
+                throw new InvalidException("Нижний порог должен быть меньше верхнего", "Нижний порог", String.valueOf(a));
+
+            // --- Добавление записи ---
+            RecIntegral rec = new RecIntegral(a, b, h, 0);
             list.add(rec);
-            javax.swing.table.DefaultTableModel model = 
-                    (javax.swing.table.DefaultTableModel) jTable1.getModel();
-            model.addRow(new Object[]{rec.id,a,b,h,0});
 
-            
+            javax.swing.table.DefaultTableModel model =
+                    (javax.swing.table.DefaultTableModel) jTable1.getModel();
+
+            model.addRow(new Object[]{rec.id, a, b, h, 0});
+
         } catch (InvalidException ex) {
-            javax.swing.JOptionPane.showMessageDialog(
+            JOptionPane.showMessageDialog(
                     this,
-                    ex.getMessage(),
+                    "Ошибка в поле: " + ex.getFieldName() +
+                    "\nВведено: " + ex.getWrongValue() +
+                    "\n" + ex.getMessage(),
                     "Ошибка данных",
-                    javax.swing.JOptionPane.WARNING_MESSAGE
+                    JOptionPane.WARNING_MESSAGE
             );
         }
     }//GEN-LAST:event_button_add
@@ -445,46 +450,79 @@ public class tabs extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_button_load_binaryActionPerformed
+
+    private void button_calculateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button_calculateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_button_calculateActionPerformed
         
     private void button_calculate(java.awt.event.ActionEvent evt) {
-    int selectedRow = jTable1.getSelectedRow();
+        int selectedRow = jTable1.getSelectedRow();
 
-    if (selectedRow != -1) {
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Choose Row!");
+            return;
+        }
+
         try {
+            RecIntegral rec = list.get(selectedRow);
+
+            double a = rec.a;
+            double b = rec.b;
+            double h = rec.h;
+
+            int threadsCount = 2; // по варианту можно 2–4
+
+            IntegralThread[] threads = new IntegralThread[threadsCount];
+
+            double interval = (b - a) / threadsCount;
+
+            // создаём и запускаем потоки
+            for (int i = 0; i < threadsCount; i++) {
+                double start = a + i * interval;
+                double end = (i == threadsCount - 1) ? b : start + interval;
+
+                threads[i] = new IntegralThread(start, end, h);
+                threads[i].start();
+            }
+
+            // ждём завершения всех потоков
+            for (IntegralThread t : threads) {
+                t.join();
+            }
+
+            // суммируем результаты
+            double total = 0;
+            for (IntegralThread t : threads) {
+                total += t.getResult();
+            }
+
+            rec.result = total;
+
+            // обновляем таблицу
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) jTable1.getModel();
-        
-
-            RecIntegral rec = list.get(selectedRow);
-            double result = rec.calculate();                  
-            model.setValueAt(result, selectedRow, 4);
-            
+            model.setValueAt(total, selectedRow, 4);
 
         } catch (Exception e) {
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    "Calculation error!");
+            JOptionPane.showMessageDialog(this, "Calculation error: " + e.getMessage());
         }
-    } else {
-        javax.swing.JOptionPane.showMessageDialog(this,
-                "Choose Row!");
-    }
-}
+        }
 
-    private void refreshTable() {
-    javax.swing.table.DefaultTableModel model =
-            (javax.swing.table.DefaultTableModel) jTable1.getModel();
+        private void refreshTable() {
+        javax.swing.table.DefaultTableModel model =
+                (javax.swing.table.DefaultTableModel) jTable1.getModel();
 
-    model.setRowCount(0); // очищаем таблицу
+        model.setRowCount(0); // очищаем таблицу
 
-    for (RecIntegral r : list) {
-        model.addRow(new Object[]{
-                r.id,
-                r.a,
-                r.b,
-                r.h,
-                r.result
-        });
-    }
+        for (RecIntegral r : list) {
+            model.addRow(new Object[]{
+                    r.id,
+                    r.a,
+                    r.b,
+                    r.h,
+                    r.result
+            });
+        }
 }
 
 

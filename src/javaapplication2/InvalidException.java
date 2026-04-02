@@ -9,8 +9,21 @@ package javaapplication2;
  * @author admin
  */
 public class InvalidException extends Exception {
-    public InvalidException(String message) {
+    private final String fieldName;
+    private final String wrongValue;
+
+    public InvalidException(String message, String fieldName, String wrongValue) {
         super(message);
+        this.fieldName = fieldName;
+        this.wrongValue = wrongValue;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public String getWrongValue() {
+        return wrongValue;
     }
 }
- 
+//получать значение неверного поля 
