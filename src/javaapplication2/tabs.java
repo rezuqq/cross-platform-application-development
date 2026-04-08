@@ -15,7 +15,7 @@ import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
-
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 /**
@@ -280,7 +280,6 @@ public class tabs extends javax.swing.JFrame {
         try {
             double a, b, h;
 
-            // --- Проверка ввода чисел ---
             try {
                 a = Double.parseDouble(textfield_lowline.getText());
             } catch (NumberFormatException e) {
@@ -298,8 +297,7 @@ public class tabs extends javax.swing.JFrame {
             } catch (NumberFormatException e) {
                 throw new InvalidException("Введите корректное число", "Шаг", textfield_step.getText());
             }
-
-            // --- Логические проверки ---
+            
             if (a < 0.000001 || a > 1_000_000)
                 throw new InvalidException("Значение вне диапазона 0.000001 – 1 000 000", "Нижний порог", String.valueOf(a));
 
@@ -315,7 +313,6 @@ public class tabs extends javax.swing.JFrame {
             if (a >= b)
                 throw new InvalidException("Нижний порог должен быть меньше верхнего", "Нижний порог", String.valueOf(a));
 
-            // --- Добавление записи ---
             RecIntegral rec = new RecIntegral(a, b, h, 0);
             list.add(rec);
 
@@ -470,35 +467,23 @@ public class tabs extends javax.swing.JFrame {
             double b = rec.b;
             double h = rec.h;
 
-            int threadsCount = 2; // по варианту можно 2–4
+            // --- список клиентов ---
+            InetAddress[] clients = {
+                InetAddress.getByName("127.0.0.1"), // клиент 1
+                InetAddress.getByName("127.0.0.1")  // клиент 2
+            };
 
-            IntegralThread[] threads = new IntegralThread[threadsCount];
+            int[] ports = {5001, 5002}; // порты клиентов
 
-            double interval = (b - a) / threadsCount;
+            // --- создаём сервер ---
+            UdpServer server = new UdpServer(clients, ports, 6000);
 
-            // создаём и запускаем потоки
-            for (int i = 0; i < threadsCount; i++) {
-                double start = a + i * interval;
-                double end = (i == threadsCount - 1) ? b : start + interval;
+            // --- запускаем распределённый расчёт ---
+            double total = server.calculateDistributed(a, b, h);
 
-                threads[i] = new IntegralThread(start, end, h);
-                threads[i].start();
-            }
-
-            // ждём завершения всех потоков
-            for (IntegralThread t : threads) {
-                t.join();
-            }
-
-            // суммируем результаты
-            double total = 0;
-            for (IntegralThread t : threads) {
-                total += t.getResult();
-            }
-
+            // --- сохраняем результат ---
             rec.result = total;
 
-            // обновляем таблицу
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) jTable1.getModel();
             model.setValueAt(total, selectedRow, 4);
@@ -506,23 +491,24 @@ public class tabs extends javax.swing.JFrame {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Calculation error: " + e.getMessage());
         }
-        }
+}
 
-        private void refreshTable() {
-        javax.swing.table.DefaultTableModel model =
-                (javax.swing.table.DefaultTableModel) jTable1.getModel();
 
-        model.setRowCount(0); // очищаем таблицу
+    private void refreshTable() {
+    javax.swing.table.DefaultTableModel model =
+            (javax.swing.table.DefaultTableModel) jTable1.getModel();
 
-        for (RecIntegral r : list) {
-            model.addRow(new Object[]{
-                    r.id,
-                    r.a,
-                    r.b,
-                    r.h,
-                    r.result
-            });
-        }
+    model.setRowCount(0); // очищаем таблицу
+
+    for (RecIntegral r : list) {
+        model.addRow(new Object[]{
+                r.id,
+                r.a,
+                r.b,
+                r.h,
+                r.result
+        });
+    }
 }
 
 

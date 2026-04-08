@@ -9,6 +9,7 @@ package javaapplication2;
  * @author admin
  */
 public class InvalidException extends Exception {
+
     private final String fieldName;
     private final String wrongValue;
 
@@ -25,5 +26,5 @@ public class InvalidException extends Exception {
     public String getWrongValue() {
         return wrongValue;
     }
+
 }
-//получать значение неверного поля 
