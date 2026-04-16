@@ -21,7 +21,7 @@ public class UdpServer {
         this.serverPort = serverPort;
     }
 
-    // ---------- поток для регистрации клиентов ----------
+    // регистрация 
     public void listenForClients() {
         new Thread(() -> {
             try (DatagramSocket socket = new DatagramSocket(serverPort)) {
@@ -46,7 +46,7 @@ public class UdpServer {
         }).start();
     }
 
-    // ---------- распределённое вычисление ----------
+    // распределённое вычисление
     public double calculateDistributed(double a, double b, double h) throws Exception {
 
         int K = clients.size();
@@ -58,7 +58,7 @@ public class UdpServer {
 
         double interval = (b - a) / K;
 
-        // ---------- отправка задач ----------
+        // отправляем задачи
         for (int i = 0; i < K; i++) {
             ClientInfo c = clients.get(i);
 
@@ -79,7 +79,7 @@ public class UdpServer {
             socket.send(packet);
         }
 
-        // ---------- приём результатов ----------
+        //  принимаем результаты
         double total = 0;
 
         for (int i = 0; i < K; i++) {
@@ -101,7 +101,7 @@ public class UdpServer {
         return total;
     }
 
-    // ---------- класс клиента ----------
+    // клиент
     private static class ClientInfo {
         InetAddress addr;
         int port;

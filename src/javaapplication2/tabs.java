@@ -466,7 +466,7 @@ public class tabs extends javax.swing.JFrame {
             return;
         }
 
-        // Запускаем вычисление в отдельном потоке
+        // вычисление в отдельном потоке
         new Thread(() -> {
             try {
                 RecIntegral rec = list.get(selectedRow);
@@ -474,13 +474,11 @@ public class tabs extends javax.swing.JFrame {
                 double a = rec.a;
                 double b = rec.b;
                 double h = rec.h;
-
-                // ДОЛГАЯ операция — выполняется в отдельном потоке
+                
                 double total = server.calculateDistributed(a, b, h);
 
                 rec.result = total;
-
-                // Обновление UI — только через invokeLater
+                
                 javax.swing.SwingUtilities.invokeLater(() -> {
                     javax.swing.table.DefaultTableModel model =
                             (javax.swing.table.DefaultTableModel) jTable1.getModel();
@@ -500,7 +498,7 @@ public class tabs extends javax.swing.JFrame {
     javax.swing.table.DefaultTableModel model =
             (javax.swing.table.DefaultTableModel) jTable1.getModel();
 
-    model.setRowCount(0); // очищаем таблицу
+    model.setRowCount(0);
 
     for (RecIntegral r : list) {
         model.addRow(new Object[]{
