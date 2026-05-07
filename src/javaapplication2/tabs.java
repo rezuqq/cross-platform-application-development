@@ -26,7 +26,7 @@ public class tabs extends javax.swing.JFrame {
  
     private java.util.List<RecIntegral> list = new java.util.ArrayList<>();
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(tabs.class.getName());
-    private UdpServer server;
+    private TcpServer server;
     /**
      * Creates new form tabs
      */
@@ -36,7 +36,7 @@ public class tabs extends javax.swing.JFrame {
         button_calculate.addActionListener(this::button_calculate);
         
                 
-        server = new UdpServer(6000);
+        server = new TcpServer(6000);
         server.listenForClients();
                 // Синхронизация таблицы и коллекции
         jTable1.getModel().addTableModelListener(e -> {
